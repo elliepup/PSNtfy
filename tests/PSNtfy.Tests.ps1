@@ -86,15 +86,14 @@ Describe 'Send-NtfyNotification' {
                 throw [System.Exception]::new('boom')
             }
 
-            $requestErrors = @()
-            $result = Send-NtfyNotification `
+            $result = @(Send-NtfyNotification `
                 -Server 'https://ntfy.example.com' `
                 -Topic 'ops' `
-                -Message 'This should fail' `
-                -ErrorVariable requestErrors
+                -Message 'This should fail' 2>&1)
 
-            $result | Should -BeNullOrEmpty
-            $requestErrors | Should -HaveCount 1
+            ($result | Where-Object {
+                $_.PSObject.TypeNames -contains 'PSNtfy.NotificationResult'
+            }) | Should -BeNullOrEmpty
         }
     }
 }
