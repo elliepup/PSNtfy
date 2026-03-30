@@ -89,7 +89,8 @@ Describe 'Send-NtfyNotification' {
             $result = @(Send-NtfyNotification `
                 -Server 'https://ntfy.example.com' `
                 -Topic 'ops' `
-                -Message 'This should fail' 2>&1)
+                -Message 'This should fail' `
+                -ErrorAction SilentlyContinue 2>&1)
 
             ($result | Where-Object {
                 $_.PSObject.TypeNames -contains 'PSNtfy.NotificationResult'
