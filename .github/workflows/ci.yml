@@ -32,14 +32,15 @@ jobs:
                     throw "Unexpected module name: $($manifest.Name)"
                   }
 
-            - name: Lint module
-              shell: pwsh
-              run: |
-                  $results = Invoke-ScriptAnalyzer -Path ./PSNtfy.psm1 -Settings ./PSScriptAnalyzerSettings.psd1
-                  if ($results) {
-                    $results | Format-Table -AutoSize | Out-String | Write-Host
-                    throw 'PSScriptAnalyzer reported issues.'
-                  }
+      - name: Lint module
+        shell: pwsh
+        run: |
+          $paths = @('./PSNtfy.psm1', './Public', './Private') | Where-Object { Test-Path $_ }
+          $results = Invoke-ScriptAnalyzer -Path $paths -Settings ./PSScriptAnalyzerSettings.psd1
+          if ($results) {
+            $results | Format-Table -AutoSize | Out-String | Write-Host
+            throw 'PSScriptAnalyzer reported issues.'
+          }
 
             - name: Run tests
               shell: pwsh
