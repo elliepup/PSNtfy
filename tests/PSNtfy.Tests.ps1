@@ -86,15 +86,15 @@ Describe 'Send-NtfyNotification' {
                 throw [System.Exception]::new('boom')
             }
 
-            $errors = @()
+            $requestErrors = @()
             $result = Send-NtfyNotification `
                 -Server 'https://ntfy.example.com' `
                 -Topic 'ops' `
                 -Message 'This should fail' `
-                -ErrorVariable +errors
+                -ErrorVariable requestErrors
 
             $result | Should -BeNullOrEmpty
-            $errors | Should -HaveCount 1
+            $requestErrors | Should -HaveCount 1
         }
     }
 }
