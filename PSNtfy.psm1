@@ -34,16 +34,28 @@ function Get-NtfyErrorRecord {
     $responseBody = $null
     $statusCode = $null
 
+    if ($ErrorRecord.ErrorDetails -and -not [string]::IsNullOrWhiteSpace($ErrorRecord.ErrorDetails.Message)) {
+        $responseBody = $ErrorRecord.ErrorDetails.Message.Trim()
+    }
+
     if ($exception.PSObject.Properties.Name -contains 'Response' -and $null -ne $exception.Response) {
         $statusCode = [int]$exception.Response.StatusCode
 
-        if ($exception.Response.Content) {
-            $responseBody = $exception.Response.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+        if (-not $responseBody -and $exception.Response.Content) {
+            try {
+                $responseBody = $exception.Response.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+            }
+            catch {
+                $responseBody = $null
+            }
         }
     }
 
-    $details = if ($responseBody) {
+    $details = if ($responseBody -and $statusCode) {
         "ntfy request failed with status code $statusCode. Response: $responseBody"
+    }
+    elseif ($responseBody) {
+        "ntfy request failed. Response: $responseBody"
     }
     elseif ($statusCode) {
         "ntfy request failed with status code $statusCode."

@@ -79,4 +79,20 @@ Describe 'Send-NtfyNotification' {
             } | Should -Throw
         }
     }
+
+    It 'does not emit a result object when the request fails' {
+        InModuleScope PSNtfy {
+            Mock Invoke-RestMethod {
+                throw [System.Exception]::new('boom')
+            }
+
+            $result = @(Send-NtfyNotification `
+                -Server 'https://ntfy.example.com' `
+                -Topic 'ops' `
+                -Message 'This should fail' `
+                -ErrorAction SilentlyContinue 2>$null)
+
+            $result | Should -BeNullOrEmpty
+        }
+    }
 }
