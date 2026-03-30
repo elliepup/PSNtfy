@@ -1,0 +1,47 @@
+name: CI
+
+on:
+    push:
+        branches:
+            - main
+            - feat/**
+            - bugfix/**
+            - chore/**
+    pull_request:
+
+jobs:
+    validate:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Install tooling
+              shell: pwsh
+              run: |
+                  Set-PSRepository PSGallery -InstallationPolicy Trusted
+                  Install-Module Pester -MinimumVersion 5.5.0 -Scope CurrentUser -Force
+                  Install-Module PSScriptAnalyzer -MinimumVersion 1.22.0 -Scope CurrentUser -Force
+
+            - name: Validate module manifest
+              shell: pwsh
+              run: |
+                  $manifest = Test-ModuleManifest -Path ./PSNtfy.psd1
+                  if ($manifest.Name -ne 'PSNtfy') {
+                    throw "Unexpected module name: $($manifest.Name)"
+                  }
+
+            - name: Lint module
+              shell: pwsh
+              run: |
+                  $results = Invoke-ScriptAnalyzer -Path ./PSNtfy.psm1 -Settings ./PSScriptAnalyzerSettings.psd1
+                  if ($results) {
+                    $results | Format-Table -AutoSize | Out-String | Write-Host
+                    throw 'PSScriptAnalyzer reported issues.'
+                  }
+
+            - name: Run tests
+              shell: pwsh
+              run: |
+                  Invoke-Pester -Path ./tests -CI
