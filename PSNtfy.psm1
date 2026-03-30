@@ -64,6 +64,57 @@ function Get-NtfyErrorRecord {
 }
 
 function Send-NtfyNotification {
+    <#
+    .SYNOPSIS
+    Sends a notification to an ntfy topic.
+
+    .DESCRIPTION
+    Sends a plain-text notification to an ntfy server and returns a structured
+    response object suitable for automation and CI usage.
+
+    .PARAMETER Message
+    The message body to send to the ntfy topic.
+
+    .PARAMETER Server
+    The base URI of the ntfy server.
+
+    .PARAMETER Topic
+    The topic that will receive the notification.
+
+    .PARAMETER Title
+    An optional notification title.
+
+    .PARAMETER Token
+    An optional bearer token used for authenticated servers.
+
+    .PARAMETER Priority
+    An optional ntfy priority from 1 to 5.
+
+    .PARAMETER Tags
+    Optional tags to attach to the notification.
+
+    .PARAMETER Click
+    An optional URL opened when the notification is clicked.
+
+    .PARAMETER Delay
+    An optional ntfy delay expression such as 10m or 1h.
+
+    .PARAMETER Filename
+    An optional filename presented by ntfy clients.
+
+    .PARAMETER Markdown
+    Enables Markdown rendering for supported ntfy clients.
+
+    .EXAMPLE
+    Send-NtfyNotification -Server 'https://ntfy.sh' -Topic 'ops' -Message 'Deployment completed.'
+
+    Sends a basic notification to the ops topic.
+
+    .EXAMPLE
+    'api healthy', 'worker healthy' | Send-NtfyNotification -Server 'https://ntfy.sh' -Topic 'status'
+
+    Sends multiple piped messages to the status topic.
+    #>
     [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
